@@ -22,3 +22,6 @@ yarn-error.log
 /.vscode
 /.zed
 data.csv
+code.txt
+summarize.py
+.llmignore
