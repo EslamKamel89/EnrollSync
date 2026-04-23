@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\ImportStudentsJob;
 use App\Models\Student;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -20,12 +21,13 @@ new class extends Component {
         $rows = file($path);
         $rows = array_map('str_getcsv', $rows);
         array_shift($rows);
-        foreach ($rows as $row) {
-            Student::create([
-                'name' => $row[0],
-                'email' => $row[1]
-            ]);
-        }
+        ImportStudentsJob::dispatch($rows);
+        // foreach ($rows as $row) {
+        //     Student::create([
+        //         'name' => $row[0],
+        //         'email' => $row[1]
+        //     ]);
+        // }
         session()->flash('success', 'Students imported successfully');
         $this->js("alert('Data imported successfully!')");
     }
