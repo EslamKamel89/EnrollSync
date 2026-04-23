@@ -5,9 +5,13 @@ namespace App\Jobs;
 use App\Models\Student;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\Timeout;
+use Illuminate\Queue\Attributes\Tries;
+use Illuminate\Support\Facades\Log;
 
+#[Tries(3)]
+#[Timeout(5)]
 class ImportStudentsJob implements ShouldQueue {
-    // This trait bundles the essential methods needed to push a job onto the queue and manage its execution, no need for any additional traits
     use Queueable;
 
     /**
@@ -21,11 +25,18 @@ class ImportStudentsJob implements ShouldQueue {
      * Execute the job.
      */
     public function handle(): void {
+        sleep(10);
         foreach ($this->rows as $row) {
-            Student::create([
-                'name' => $row[0],
-                'email' => $row[1]
-            ]);
+            Student::updateOrCreate(
+                ['email' => $row[1]],
+                ['name' => $row[0]]
+            );
         }
+    }
+    public function failed(\Throwable $exception) {
+        Log::error('ImportStudentsJob failed', [
+            'error' => $exception->getMessage(),
+            'rows_count' => count($this->rows)
+        ]);
     }
 }
